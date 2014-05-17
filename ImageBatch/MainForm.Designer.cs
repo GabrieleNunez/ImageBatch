@@ -35,7 +35,7 @@
             this.deleteButton = new System.Windows.Forms.Button();
             this.addButton = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
+            this.operationCheckbox = new System.Windows.Forms.CheckedListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.browseButton = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
@@ -118,7 +118,7 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.checkedListBox1);
+            this.groupBox2.Controls.Add(this.operationCheckbox);
             this.groupBox2.Location = new System.Drawing.Point(277, 22);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(330, 130);
@@ -126,18 +126,15 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Batch Operations";
             // 
-            // checkedListBox1
+            // operationCheckbox
             // 
-            this.checkedListBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Items.AddRange(new object[] {
-            "Water Mark",
-            "Resize"});
-            this.checkedListBox1.Location = new System.Drawing.Point(3, 16);
-            this.checkedListBox1.MultiColumn = true;
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(324, 111);
-            this.checkedListBox1.TabIndex = 0;
+            this.operationCheckbox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.operationCheckbox.FormattingEnabled = true;
+            this.operationCheckbox.Location = new System.Drawing.Point(3, 16);
+            this.operationCheckbox.MultiColumn = true;
+            this.operationCheckbox.Name = "operationCheckbox";
+            this.operationCheckbox.Size = new System.Drawing.Size(324, 111);
+            this.operationCheckbox.TabIndex = 0;
             // 
             // groupBox3
             // 
@@ -416,7 +413,7 @@
         private System.Windows.Forms.Button deleteButton;
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private System.Windows.Forms.CheckedListBox operationCheckbox;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.CheckedListBox checkedListBox2;
         private System.Windows.Forms.Button browseButton;

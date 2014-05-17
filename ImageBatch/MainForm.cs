@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageBatch.ImageOperations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,7 +19,11 @@ namespace ImageBatch
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            WatermarkOperation watermarkOp = new WatermarkOperation();
+            operationCheckbox.Items.Add(watermarkOp);
 
+            ResizeOperation resizeOperation = new ResizeOperation();
+            operationCheckbox.Items.Add(resizeOperation);
         }
     }
 }

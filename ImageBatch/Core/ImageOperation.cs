@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ImageBatch.Core
 {
-    public abstract class ImageOperation
+    public abstract class ImageOperation : IDisposable
     {
         public const int PRIORITY_MAX =  int.MaxValue;
         public const int PRIORITY_HIGH = 1000;
@@ -21,5 +21,7 @@ namespace ImageBatch.Core
         {
             return Name;
         }
+
+        public abstract void Dispose();
     }
 }
