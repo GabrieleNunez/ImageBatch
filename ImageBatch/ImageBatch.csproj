@@ -45,7 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\BatchManager.cs" />
+    <Compile Include="Core\BatchSettings.cs" />
+    <Compile Include="Core\ImageOperation.cs" />
     <Compile Include="Core\Scanner.cs" />
+    <Compile Include="Core\ScannerEventArgs.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

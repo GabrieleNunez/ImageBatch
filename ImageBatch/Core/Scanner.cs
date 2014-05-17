@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ImageBatch.Core
 {
-    public delegate void ScannerEventHandler(string file);
+    public delegate void ScannerEventHandler(Scanner scanner,ScannerEventArgs eventArgs);
 
     /// <summary>
     /// Scanner will enumurate over files in the given directory.
@@ -39,10 +39,11 @@ namespace ImageBatch.Core
                     case ".jpeg":
                     case ".png":
                     case ".gif":
+                    case ".tiff":
                         if (ImageFound != null)
                         {
-                            ImageFound.Invoke(path);
-                            continue;
+                            ScannerEventArgs args = new ScannerEventArgs(path);
+                            ImageFound.Invoke(this,args);
                         }
                         continue;
                     default:

@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace ImageBatch
@@ -13,9 +18,16 @@ namespace ImageBatch
         [STAThread]
         static void Main()
         {
+            string file = Path.Combine(Application.StartupPath, "Test.jpg");
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            using (MainForm form = new MainForm())
+            {
+                Application.Run(form);
+            }
+
+           
         }
     }
 }
