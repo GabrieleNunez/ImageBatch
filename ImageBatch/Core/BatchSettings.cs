@@ -6,7 +6,7 @@ using System.Text;
 namespace ImageBatch.Core
 {
     /// <summary>
-    /// The settings a BatchManager needs to start operations
+    /// The settings a BatchManager needs to start and mantain operations
     /// </summary>
     public class BatchSettings
     {
@@ -20,6 +20,15 @@ namespace ImageBatch.Core
         public int MaxFiles { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
+
+        public BatchSettings()
+        {
+            MaxFiles = 500;
+            OrganizeByDate = true;
+            MaintainAspectRatio = true;
+            Width = 256;
+            Height = 256;
+        }
         
     }
 }

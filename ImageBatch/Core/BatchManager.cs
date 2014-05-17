@@ -11,6 +11,7 @@ using System.Threading;
 
 namespace ImageBatch.Core
 {
+    public delegate void BatchEventHandler(BatchManager manager);
     /// <summary>
     /// Every batch manager will be in charge of its own set of files.
     /// It'll process and do whatever it has to do to the images
@@ -22,10 +23,20 @@ namespace ImageBatch.Core
         private Thread operationThread;
         private BatchSettings batchSettings;
         private int processed;
+        private bool isRunning;
+
         private const int PROPERTY_ID_DATETIME = 36867;
+
+        public event BatchEventHandler AtMaxCapacity;
+        public event BatchEventHandler FileAdded;
+        public int TotalProcessed { get { return processed; } }
+        public bool IsRunning { get { return isRunning; } }
+        public bool IsFilled { get { return files.Count == batchSettings.MaxFiles;}}
+        
         public BatchManager(BatchSettings BatchSettings)
         {
             processed = 0;
+            isRunning = false;
             files = new ConcurrentStack<string>();
             batchSettings = BatchSettings;
             ParameterizedThreadStart threadStart = new ParameterizedThreadStart(operationExecute);
@@ -46,14 +57,16 @@ namespace ImageBatch.Core
         }
         private void operationExecute(object parameter)
         {
+            isRunning = true;
+
             ImageOperation[] operations = (ImageOperation[])parameter;
 
             ImageOperation maxPriority = (from op in operations
                                           where op.Priority == ImageOperation.PRIORITY_MAX
                                           select op).First();
 
-            IEnumerable<ImageOperation> highPriorities = GetPriorities(operations, 
-                                                         ImageOperation.PRIORITY_HIGH, 
+            IEnumerable<ImageOperation> highPriorities = GetPriorities(operations,
+                                                         ImageOperation.PRIORITY_HIGH,
                                                          ImageOperation.PRIORITY_MAX);
             IEnumerable<ImageOperation> mediumPriorities = GetPriorities(operations,
                                                             ImageOperation.PRIORITY_MEDIUM,
@@ -62,7 +75,7 @@ namespace ImageBatch.Core
                                                             ImageOperation.PRIORITY_LOW,
                                                             ImageOperation.PRIORITY_MEDIUM);
             StringBuilder builder = new StringBuilder();
-                        
+
             while (!files.IsEmpty)
             {
                 builder.Clear();
@@ -110,6 +123,7 @@ namespace ImageBatch.Core
                                 builder.Append(batchSettings.FileLabel);
                             builder.Append(Path.GetExtension(file));
                             ImageFormat imgFormat = GetImageFormat(Path.GetExtension(file));
+                            processed++;
                             bitmap.Save(builder.ToString(), imgFormat);
                         }
                     }
@@ -120,7 +134,7 @@ namespace ImageBatch.Core
                     }
                 }
             }
-
+            isRunning = false;
         }
         private ImageFormat GetImageFormat(string extension)
         {
@@ -145,12 +159,22 @@ namespace ImageBatch.Core
             {
                 e.NowHandled();
                 files.Push(e.File);
+                if (FileAdded != null)
+                    FileAdded.Invoke(this);
+                if (files.Count == batchSettings.MaxFiles)
+                {
+                    if (AtMaxCapacity != null)
+                        AtMaxCapacity.Invoke(this);
+                }
             }
         }
         public void Launch(ImageOperation[] operations)
         {
-            if(!operationThread.IsAlive)
+            if (!operationThread.IsAlive)
+            {
+                processed = 0;
                 operationThread.Start(operations);
+            }
         }
         public void Abort()
         {
