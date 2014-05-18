@@ -30,25 +30,32 @@ namespace ImageBatch.Core
         /// </summary>
         public void Scan()
         {
-            IEnumerable<string> files = Directory.EnumerateFiles(directory, "*.*", searchOption);
-            foreach (string path in files)
+            try
             {
-                switch (Path.GetExtension(path).ToLower())
+                IEnumerable<string> files = Directory.EnumerateFiles(directory, "*.*", searchOption);
+                foreach (string path in files)
                 {
-                    case ".jpg":
-                    case ".jpeg":
-                    case ".png":
-                    case ".gif":
-                    case ".tiff":
-                        if (ImageFound != null)
-                        {
-                            ScannerEventArgs args = new ScannerEventArgs(path);
-                            ImageFound.Invoke(this,args);
-                        }
-                        continue;
-                    default:
-                        continue;
+                    switch (Path.GetExtension(path).ToLower())
+                    {
+                        case ".jpg":
+                        case ".jpeg":
+                        case ".png":
+                        case ".gif":
+                        case ".tiff":
+                            if (ImageFound != null)
+                            {
+                                ScannerEventArgs args = new ScannerEventArgs(path);
+                                ImageFound.Invoke(this, args);
+                            }
+                            continue;
+                        default:
+                            continue;
+                    }
                 }
+            }
+            catch (UnauthorizedAccessException)
+            {
+               //silently end operation
             }
         }
     }

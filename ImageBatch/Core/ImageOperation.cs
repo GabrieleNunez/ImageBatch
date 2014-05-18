@@ -15,8 +15,10 @@ namespace ImageBatch.Core
 
         public abstract string Name { get; }
         public abstract int Priority { get; }
-        public abstract void Perform(Bitmap bitmap);
+        public abstract bool Loaded { get; }
+        public abstract void Perform(ref Bitmap bitmap);
 
+        public abstract void Load(BatchSettings settings);
         public override string ToString()
         {
             return Name;

@@ -12,6 +12,15 @@ namespace ImageBatch
         private List<BatchManager> batchManagers;
         private List<Scanner> scanners;
         private BatchSettings batchSettings;
+        private int totalFiles;
+        private int totalDone;
+        private int totalManagersDone;
+
+        public int BatchManagerCount { get { return batchManagers.Count; } }
+        public int ScannerCount { get { return scanners.Count; } }
+        public int TotalFiles { get { return totalFiles; } }
+        public int TotalProcessed { get { return totalDone; } }
+        public event EventHandler Done;
 
         private BatchManager LeastFilledManager
         {
@@ -21,6 +30,7 @@ namespace ImageBatch
                 return batchManagers.Last();
             }
         }
+
         public ControlCenter(BatchSettings settings)
         {
             batchManagers = new List<BatchManager>();
@@ -29,12 +39,38 @@ namespace ImageBatch
             BatchManager manager = new BatchManager(batchSettings);
             batchManagers.Add(manager);
             manager.AtMaxCapacity += manager_AtMaxCapacity;
+            manager.FileAdded += manager_FileAdded;
+            manager.Done += manager_Done;
+            manager.ProcessedFile += manager_ProcessedFile;
         }
 
-        void manager_AtMaxCapacity(BatchManager manager)
+        void manager_ProcessedFile(BatchManager manager)
+        {
+            totalDone++;
+        }
+
+        private void manager_Done(BatchManager manager)
+        {
+            totalManagersDone++;
+            if (totalManagersDone == batchManagers.Count)
+            {
+                if (Done != null)
+                    Done.Invoke(this, null);
+            }
+        }
+
+        private void manager_FileAdded(BatchManager manager)
+        {
+            totalFiles++;
+        }
+
+        private void manager_AtMaxCapacity(BatchManager manager)
         {
             BatchManager batchManager = new BatchManager(batchSettings);
             batchManager.AtMaxCapacity += manager_AtMaxCapacity;
+            batchManager.FileAdded += manager_FileAdded;
+            batchManager.Done += manager_Done;
+            batchManager.ProcessedFile += manager_ProcessedFile;
             batchManagers.Add(batchManager);
             foreach (Scanner scanner in scanners)
                 batchManager.WatchScanner(scanner);

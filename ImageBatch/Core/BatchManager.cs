@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -26,9 +27,11 @@ namespace ImageBatch.Core
         private bool isRunning;
 
         private const int PROPERTY_ID_DATETIME = 36867;
-
+       // private const int PROPERTY_ID_DATETIME = 306;
         public event BatchEventHandler AtMaxCapacity;
         public event BatchEventHandler FileAdded;
+        public event BatchEventHandler Done;
+        public event BatchEventHandler ProcessedFile;
         public int TotalProcessed { get { return processed; } }
         public bool IsRunning { get { return isRunning; } }
         public bool IsFilled { get { return files.Count == batchSettings.MaxFiles;}}
@@ -61,9 +64,16 @@ namespace ImageBatch.Core
 
             ImageOperation[] operations = (ImageOperation[])parameter;
 
-            ImageOperation maxPriority = (from op in operations
+            IEnumerable<ImageOperation> maxPriorities = (from op in operations
                                           where op.Priority == ImageOperation.PRIORITY_MAX
-                                          select op).First();
+                                          select op);
+            ImageOperation maxPriority = null;
+            if (maxPriorities.Count() > 0)
+                maxPriority = maxPriorities.First();
+
+            foreach (ImageOperation op in operations)
+                if(!op.Loaded)
+                    op.Load(batchSettings);
 
             IEnumerable<ImageOperation> highPriorities = GetPriorities(operations,
                                                          ImageOperation.PRIORITY_HIGH,
@@ -84,48 +94,68 @@ namespace ImageBatch.Core
                 {
                     try
                     {
-                        using (Bitmap bitmap = (Bitmap)Bitmap.FromFile(file))
+                        Bitmap bitmap = (Bitmap)Bitmap.FromFile(file);
+
+                        foreach (ImageOperation op in lowPriorities)
+                            op.Perform(ref bitmap);
+                        foreach (ImageOperation op in mediumPriorities)
+                            op.Perform(ref bitmap);
+                        foreach (ImageOperation op in highPriorities)
+                            op.Perform(ref bitmap);
+                        if (maxPriority != null)
+                            maxPriority.Perform(ref bitmap);
+
+                        if (!string.IsNullOrEmpty(batchSettings.OutputDirectory))
+                            builder.Append(batchSettings.OutputDirectory);
+                        else
+                            builder.Append(Path.GetPathRoot(file));
+
+                        if (batchSettings.OrganizeByDate)
                         {
-                            foreach (ImageOperation op in lowPriorities)
-                                op.Perform(bitmap);
-                            foreach (ImageOperation op in mediumPriorities)
-                                op.Perform(bitmap);
-                            foreach (ImageOperation op in highPriorities)
-                                op.Perform(bitmap);
-                            if (maxPriority != null)
-                                maxPriority.Perform(bitmap);
-
-                            if (!string.IsNullOrEmpty(batchSettings.OutputDirectory))
-                                builder.Append(batchSettings.OutputDirectory);
-                            else
-                                builder.Append(Path.GetPathRoot(file));
-
-                            if (batchSettings.OrganizeByDate)
+                            DateTime dateTaken = DateTime.Now;
+                            try
                             {
-                                DateTime dateTaken = DateTime.Now;
-                                try
+                                PropertyItem property = bitmap.GetPropertyItem(PROPERTY_ID_DATETIME);
+                                if (!DateTime.TryParse(Encoding.UTF8.GetString(property.Value), out dateTaken))
                                 {
-                                    PropertyItem property = bitmap.GetPropertyItem(PROPERTY_ID_DATETIME);
-                                    if (!DateTime.TryParse(Encoding.UTF8.GetString(property.Value), out dateTaken))
-                                        dateTaken = File.GetCreationTime(file);
-
-                                }
-                                catch (ArgumentException)
-                                {
+                                    Debug.WriteLine("Failed to parse");
+                                    Debug.WriteLine(Encoding.UTF8.GetString(property.Value));
                                     dateTaken = File.GetCreationTime(file);
                                 }
-                                finally
-                                {
-                                    builder.AppendFormat("\\{0}\\", dateTaken.Date.ToString("yyyy-MM-dd"));
-                                }
+                                Debug.WriteLine(dateTaken.ToString());
+
                             }
-                            if (!string.IsNullOrEmpty(batchSettings.FileLabel))
-                                builder.Append(batchSettings.FileLabel);
-                            builder.Append(Path.GetExtension(file));
-                            ImageFormat imgFormat = GetImageFormat(Path.GetExtension(file));
-                            processed++;
-                            bitmap.Save(builder.ToString(), imgFormat);
+                            catch (ArgumentException)
+                            {
+                                Debug.WriteLine("No Date Property found. Using Fallback");
+                                dateTaken = File.GetCreationTime(file);
+                            }
+                            finally
+                            {
+                                builder.AppendFormat("\\{0}\\", dateTaken.Date.ToString("yyyy-MM-dd"));
+                                if (!Directory.Exists(builder.ToString()))
+                                    Directory.CreateDirectory(builder.ToString());
+                            }
                         }
+                        builder.Append(Path.GetFileName(file));
+                        ImageFormat imgFormat = GetImageFormat(Path.GetExtension(file));
+                        try
+                        {
+                            Debug.WriteLine(builder.ToString());
+                            if (bitmap == null)
+                                Debug.WriteLine("bitmap disposed");
+                            
+                            bitmap.Save(builder.ToString(), imgFormat);
+
+                        }
+                        catch (ExternalException)
+                        {
+                            Debug.WriteLine("Failed to write file");
+                        }
+                        bitmap.Dispose();
+                        if (ProcessedFile != null)
+                            ProcessedFile.Invoke(this);
+                        processed++;
                     }
                     catch (System.InvalidOperationException)
                     {
@@ -134,6 +164,8 @@ namespace ImageBatch.Core
                     }
                 }
             }
+            if (Done != null)
+                Done.Invoke(this);
             isRunning = false;
         }
         private ImageFormat GetImageFormat(string extension)

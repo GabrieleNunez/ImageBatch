@@ -31,7 +31,6 @@
             this.components = new System.ComponentModel.Container();
             this.foldersToScanListBox = new System.Windows.Forms.ListBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.scanSubFoldersCheckBox = new System.Windows.Forms.CheckBox();
             this.deleteButton = new System.Windows.Forms.Button();
             this.addButton = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -41,30 +40,31 @@
             this.label5 = new System.Windows.Forms.Label();
             this.fileLabelTextbox = new System.Windows.Forms.TextBox();
             this.outputFolderTextbox = new System.Windows.Forms.TextBox();
-            this.checkedListBox2 = new System.Windows.Forms.CheckedListBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.totalBatchManagers = new System.Windows.Forms.Label();
+            this.amountProcessedLabel = new System.Windows.Forms.Label();
+            this.imagesToProcessLabel = new System.Windows.Forms.Label();
             this.startButton = new System.Windows.Forms.Button();
             this.stopButton = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.inputImageButton = new System.Windows.Forms.Button();
+            this.aspectRatioCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.widthNumeric = new System.Windows.Forms.NumericUpDown();
+            this.heightNumeric = new System.Windows.Forms.NumericUpDown();
+            this.additionalImageTextbox = new System.Windows.Forms.TextBox();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.globalToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.infoTimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.widthNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.heightNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // foldersToScanListBox
@@ -77,7 +77,6 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.scanSubFoldersCheckBox);
             this.groupBox1.Controls.Add(this.deleteButton);
             this.groupBox1.Controls.Add(this.addButton);
             this.groupBox1.Controls.Add(this.foldersToScanListBox);
@@ -88,16 +87,6 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Image Folders";
             // 
-            // scanSubFoldersCheckBox
-            // 
-            this.scanSubFoldersCheckBox.AutoSize = true;
-            this.scanSubFoldersCheckBox.Location = new System.Drawing.Point(133, 78);
-            this.scanSubFoldersCheckBox.Name = "scanSubFoldersCheckBox";
-            this.scanSubFoldersCheckBox.Size = new System.Drawing.Size(102, 17);
-            this.scanSubFoldersCheckBox.TabIndex = 3;
-            this.scanSubFoldersCheckBox.Text = "Scan subfolders";
-            this.scanSubFoldersCheckBox.UseVisualStyleBackColor = true;
-            // 
             // deleteButton
             // 
             this.deleteButton.Location = new System.Drawing.Point(132, 48);
@@ -106,6 +95,7 @@
             this.deleteButton.TabIndex = 2;
             this.deleteButton.Text = "Delete";
             this.deleteButton.UseVisualStyleBackColor = true;
+            this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
             // 
             // addButton
             // 
@@ -115,6 +105,7 @@
             this.addButton.TabIndex = 1;
             this.addButton.Text = "Add ";
             this.addButton.UseVisualStyleBackColor = true;
+            this.addButton.Click += new System.EventHandler(this.addButton_Click);
             // 
             // groupBox2
             // 
@@ -142,27 +133,27 @@
             this.groupBox3.Controls.Add(this.label5);
             this.groupBox3.Controls.Add(this.fileLabelTextbox);
             this.groupBox3.Controls.Add(this.outputFolderTextbox);
-            this.groupBox3.Controls.Add(this.checkedListBox2);
             this.groupBox3.Location = new System.Drawing.Point(13, 159);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(266, 141);
+            this.groupBox3.Size = new System.Drawing.Size(266, 100);
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Output Options";
             // 
             // browseButton
             // 
-            this.browseButton.Location = new System.Drawing.Point(5, 113);
+            this.browseButton.Location = new System.Drawing.Point(5, 47);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(75, 23);
             this.browseButton.TabIndex = 4;
             this.browseButton.Text = "Output";
             this.browseButton.UseVisualStyleBackColor = true;
+            this.browseButton.Click += new System.EventHandler(this.browseButton_Click);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 93);
+            this.label5.Location = new System.Drawing.Point(12, 27);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(52, 13);
             this.label5.TabIndex = 6;
@@ -170,61 +161,60 @@
             // 
             // fileLabelTextbox
             // 
-            this.fileLabelTextbox.Location = new System.Drawing.Point(83, 86);
+            this.fileLabelTextbox.Location = new System.Drawing.Point(83, 20);
             this.fileLabelTextbox.Name = "fileLabelTextbox";
             this.fileLabelTextbox.Size = new System.Drawing.Size(177, 20);
             this.fileLabelTextbox.TabIndex = 5;
             this.globalToolTip.SetToolTip(this.fileLabelTextbox, "What do we ultimately name the base name of the file");
+            this.fileLabelTextbox.TextChanged += new System.EventHandler(this.fileLabelTextbox_TextChanged);
             // 
             // outputFolderTextbox
             // 
-            this.outputFolderTextbox.Location = new System.Drawing.Point(83, 115);
+            this.outputFolderTextbox.Location = new System.Drawing.Point(83, 49);
             this.outputFolderTextbox.Name = "outputFolderTextbox";
             this.outputFolderTextbox.Size = new System.Drawing.Size(177, 20);
             this.outputFolderTextbox.TabIndex = 1;
             this.globalToolTip.SetToolTip(this.outputFolderTextbox, "Output directory location");
-            // 
-            // checkedListBox2
-            // 
-            this.checkedListBox2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.checkedListBox2.FormattingEnabled = true;
-            this.checkedListBox2.Items.AddRange(new object[] {
-            "New version to \"Output Folder\"",
-            "Rename Label",
-            "Organize by Date"});
-            this.checkedListBox2.Location = new System.Drawing.Point(3, 16);
-            this.checkedListBox2.Name = "checkedListBox2";
-            this.checkedListBox2.Size = new System.Drawing.Size(260, 64);
-            this.checkedListBox2.TabIndex = 0;
+            this.outputFolderTextbox.TextChanged += new System.EventHandler(this.outputFolderTextbox_TextChanged);
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.label2);
-            this.groupBox4.Controls.Add(this.label1);
-            this.groupBox4.Location = new System.Drawing.Point(18, 306);
+            this.groupBox4.Controls.Add(this.totalBatchManagers);
+            this.groupBox4.Controls.Add(this.amountProcessedLabel);
+            this.groupBox4.Controls.Add(this.imagesToProcessLabel);
+            this.groupBox4.Location = new System.Drawing.Point(18, 266);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(261, 76);
+            this.groupBox4.Size = new System.Drawing.Size(261, 116);
             this.groupBox4.TabIndex = 4;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Process Information";
             // 
-            // label2
+            // totalBatchManagers
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 49);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(99, 13);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Amount Processed:";
+            this.totalBatchManagers.AutoSize = true;
+            this.totalBatchManagers.Location = new System.Drawing.Point(7, 71);
+            this.totalBatchManagers.Name = "totalBatchManagers";
+            this.totalBatchManagers.Size = new System.Drawing.Size(115, 13);
+            this.totalBatchManagers.TabIndex = 2;
+            this.totalBatchManagers.Text = "Total Batch Managers:";
             // 
-            // label1
+            // amountProcessedLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 20);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(97, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Images to Process:";
+            this.amountProcessedLabel.AutoSize = true;
+            this.amountProcessedLabel.Location = new System.Drawing.Point(7, 43);
+            this.amountProcessedLabel.Name = "amountProcessedLabel";
+            this.amountProcessedLabel.Size = new System.Drawing.Size(99, 13);
+            this.amountProcessedLabel.TabIndex = 1;
+            this.amountProcessedLabel.Text = "Amount Processed:";
+            // 
+            // imagesToProcessLabel
+            // 
+            this.imagesToProcessLabel.AutoSize = true;
+            this.imagesToProcessLabel.Location = new System.Drawing.Point(7, 20);
+            this.imagesToProcessLabel.Name = "imagesToProcessLabel";
+            this.imagesToProcessLabel.Size = new System.Drawing.Size(97, 13);
+            this.imagesToProcessLabel.TabIndex = 0;
+            this.imagesToProcessLabel.Text = "Images to Process:";
             // 
             // startButton
             // 
@@ -234,6 +224,7 @@
             this.startButton.TabIndex = 5;
             this.startButton.Text = "Start";
             this.startButton.UseVisualStyleBackColor = true;
+            this.startButton.Click += new System.EventHandler(this.startButton_Click);
             // 
             // stopButton
             // 
@@ -244,16 +235,17 @@
             this.stopButton.TabIndex = 6;
             this.stopButton.Text = "Stop";
             this.stopButton.UseVisualStyleBackColor = true;
+            this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.button1);
-            this.groupBox5.Controls.Add(this.checkBox1);
+            this.groupBox5.Controls.Add(this.inputImageButton);
+            this.groupBox5.Controls.Add(this.aspectRatioCheckBox);
             this.groupBox5.Controls.Add(this.label4);
             this.groupBox5.Controls.Add(this.label3);
-            this.groupBox5.Controls.Add(this.numericUpDown2);
-            this.groupBox5.Controls.Add(this.numericUpDown1);
-            this.groupBox5.Controls.Add(this.textBox1);
+            this.groupBox5.Controls.Add(this.widthNumeric);
+            this.groupBox5.Controls.Add(this.heightNumeric);
+            this.groupBox5.Controls.Add(this.additionalImageTextbox);
             this.groupBox5.Location = new System.Drawing.Point(286, 159);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(321, 100);
@@ -261,24 +253,26 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Built in Operations Options";
             // 
-            // button1
+            // inputImageButton
             // 
-            this.button1.Location = new System.Drawing.Point(6, 18);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "Input";
-            this.button1.UseVisualStyleBackColor = true;
+            this.inputImageButton.Location = new System.Drawing.Point(6, 18);
+            this.inputImageButton.Name = "inputImageButton";
+            this.inputImageButton.Size = new System.Drawing.Size(75, 23);
+            this.inputImageButton.TabIndex = 6;
+            this.inputImageButton.Text = "Input";
+            this.inputImageButton.UseVisualStyleBackColor = true;
+            this.inputImageButton.Click += new System.EventHandler(this.button1_Click);
             // 
-            // checkBox1
+            // aspectRatioCheckBox
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(185, 63);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(130, 17);
-            this.checkBox1.TabIndex = 11;
-            this.checkBox1.Text = "Maintain Aspect Ratio";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.aspectRatioCheckBox.AutoSize = true;
+            this.aspectRatioCheckBox.Location = new System.Drawing.Point(185, 63);
+            this.aspectRatioCheckBox.Name = "aspectRatioCheckBox";
+            this.aspectRatioCheckBox.Size = new System.Drawing.Size(130, 17);
+            this.aspectRatioCheckBox.TabIndex = 11;
+            this.aspectRatioCheckBox.Text = "Maintain Aspect Ratio";
+            this.aspectRatioCheckBox.UseVisualStyleBackColor = true;
+            this.aspectRatioCheckBox.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // label4
             // 
@@ -298,57 +292,60 @@
             this.label3.TabIndex = 9;
             this.label3.Text = "Width";
             // 
-            // numericUpDown2
+            // widthNumeric
             // 
-            this.numericUpDown2.Location = new System.Drawing.Point(59, 46);
-            this.numericUpDown2.Maximum = new decimal(new int[] {
+            this.widthNumeric.Location = new System.Drawing.Point(59, 46);
+            this.widthNumeric.Maximum = new decimal(new int[] {
             9999999,
             0,
             0,
             0});
-            this.numericUpDown2.Minimum = new decimal(new int[] {
+            this.widthNumeric.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDown2.TabIndex = 8;
-            this.numericUpDown2.Value = new decimal(new int[] {
+            this.widthNumeric.Name = "widthNumeric";
+            this.widthNumeric.Size = new System.Drawing.Size(120, 20);
+            this.widthNumeric.TabIndex = 8;
+            this.widthNumeric.Value = new decimal(new int[] {
             1,
             0,
             0,
             0});
+            this.widthNumeric.ValueChanged += new System.EventHandler(this.numericUpDown2_ValueChanged);
             // 
-            // numericUpDown1
+            // heightNumeric
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(59, 74);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
+            this.heightNumeric.Location = new System.Drawing.Point(59, 74);
+            this.heightNumeric.Maximum = new decimal(new int[] {
             9999999,
             0,
             0,
             0});
-            this.numericUpDown1.Minimum = new decimal(new int[] {
+            this.heightNumeric.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDown1.TabIndex = 7;
-            this.numericUpDown1.Value = new decimal(new int[] {
+            this.heightNumeric.Name = "heightNumeric";
+            this.heightNumeric.Size = new System.Drawing.Size(120, 20);
+            this.heightNumeric.TabIndex = 7;
+            this.heightNumeric.Value = new decimal(new int[] {
             1,
             0,
             0,
             0});
+            this.heightNumeric.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
-            // textBox1
+            // additionalImageTextbox
             // 
-            this.textBox1.Location = new System.Drawing.Point(95, 20);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(212, 20);
-            this.textBox1.TabIndex = 0;
-            this.globalToolTip.SetToolTip(this.textBox1, "Supply an additional image. EG: for watermarking");
+            this.additionalImageTextbox.Location = new System.Drawing.Point(95, 20);
+            this.additionalImageTextbox.Name = "additionalImageTextbox";
+            this.additionalImageTextbox.Size = new System.Drawing.Size(212, 20);
+            this.additionalImageTextbox.TabIndex = 0;
+            this.globalToolTip.SetToolTip(this.additionalImageTextbox, "Supply an additional image. EG: for watermarking");
+            this.additionalImageTextbox.TextChanged += new System.EventHandler(this.additionalImageTextbox_TextChanged);
             // 
             // groupBox6
             // 
@@ -370,6 +367,11 @@
             this.progressBar1.Size = new System.Drawing.Size(153, 23);
             this.progressBar1.TabIndex = 9;
             // 
+            // infoTimer
+            // 
+            this.infoTimer.Interval = 500;
+            this.infoTimer.Tick += new System.EventHandler(this.infoTimer_Tick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -389,9 +391,9 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Image Batcher";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
@@ -399,8 +401,8 @@
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.widthNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.heightNumeric)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -409,33 +411,33 @@
 
         private System.Windows.Forms.ListBox foldersToScanListBox;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.CheckBox scanSubFoldersCheckBox;
         private System.Windows.Forms.Button deleteButton;
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckedListBox operationCheckbox;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.CheckedListBox checkedListBox2;
-        private System.Windows.Forms.Button browseButton;
         private System.Windows.Forms.TextBox outputFolderTextbox;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.Button stopButton;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label amountProcessedLabel;
+        private System.Windows.Forms.Label imagesToProcessLabel;
         private System.Windows.Forms.TextBox fileLabelTextbox;
         private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.Button inputImageButton;
+        private System.Windows.Forms.TextBox additionalImageTextbox;
+        private System.Windows.Forms.NumericUpDown widthNumeric;
+        private System.Windows.Forms.NumericUpDown heightNumeric;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox aspectRatioCheckBox;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ToolTip globalToolTip;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Button browseButton;
+        private System.Windows.Forms.Label totalBatchManagers;
+        private System.Windows.Forms.Timer infoTimer;
     }
 }
 

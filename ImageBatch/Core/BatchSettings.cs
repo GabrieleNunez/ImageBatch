@@ -23,7 +23,7 @@ namespace ImageBatch.Core
 
         public BatchSettings()
         {
-            MaxFiles = 500;
+            MaxFiles = 25;
             OrganizeByDate = true;
             MaintainAspectRatio = true;
             Width = 256;
