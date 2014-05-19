@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace ImageBatch.Core
@@ -25,9 +26,8 @@ namespace ImageBatch.Core
         private BatchSettings batchSettings;
         private int processed;
         private bool isRunning;
-
+        private Regex regEx;
         private const int PROPERTY_ID_DATETIME = 36867;
-       // private const int PROPERTY_ID_DATETIME = 306;
         public event BatchEventHandler AtMaxCapacity;
         public event BatchEventHandler FileAdded;
         public event BatchEventHandler Done;
@@ -44,6 +44,7 @@ namespace ImageBatch.Core
             batchSettings = BatchSettings;
             ParameterizedThreadStart threadStart = new ParameterizedThreadStart(operationExecute);
             operationThread = new Thread(threadStart);
+            regEx = new Regex(":");
         }
         
         public void WatchScanner(Scanner scanner)
@@ -64,9 +65,9 @@ namespace ImageBatch.Core
 
             ImageOperation[] operations = (ImageOperation[])parameter;
 
-            IEnumerable<ImageOperation> maxPriorities = (from op in operations
-                                          where op.Priority == ImageOperation.PRIORITY_MAX
-                                          select op);
+            IEnumerable<ImageOperation> maxPriorities = from op in operations
+                                                        where op.Priority == ImageOperation.PRIORITY_MAX
+                                                        select op;
             ImageOperation maxPriority = null;
             if (maxPriorities.Count() > 0)
                 maxPriority = maxPriorities.First();
@@ -95,7 +96,6 @@ namespace ImageBatch.Core
                     try
                     {
                         Bitmap bitmap = (Bitmap)Bitmap.FromFile(file);
-
                         foreach (ImageOperation op in lowPriorities)
                             op.Perform(ref bitmap);
                         foreach (ImageOperation op in mediumPriorities)
@@ -113,46 +113,38 @@ namespace ImageBatch.Core
                         if (batchSettings.OrganizeByDate)
                         {
                             DateTime dateTaken = DateTime.Now;
-                            try
+
+                            if (bitmap.PropertyIdList.Contains(PROPERTY_ID_DATETIME))
                             {
                                 PropertyItem property = bitmap.GetPropertyItem(PROPERTY_ID_DATETIME);
-                                if (!DateTime.TryParse(Encoding.UTF8.GetString(property.Value), out dateTaken))
-                                {
-                                    Debug.WriteLine("Failed to parse");
-                                    Debug.WriteLine(Encoding.UTF8.GetString(property.Value));
+                                string date = regEx.Replace(Encoding.UTF8.GetString(property.Value), "-", 2);
+                                if (!DateTime.TryParse(date, out dateTaken))
                                     dateTaken = File.GetCreationTime(file);
-                                }
-                                Debug.WriteLine(dateTaken.ToString());
-
                             }
-                            catch (ArgumentException)
-                            {
-                                Debug.WriteLine("No Date Property found. Using Fallback");
+                            else
                                 dateTaken = File.GetCreationTime(file);
-                            }
-                            finally
-                            {
-                                builder.AppendFormat("\\{0}\\", dateTaken.Date.ToString("yyyy-MM-dd"));
-                                if (!Directory.Exists(builder.ToString()))
-                                    Directory.CreateDirectory(builder.ToString());
-                            }
+
+                            builder.AppendFormat("\\{0}\\", dateTaken.Date.ToString("yyyy-MM-dd"));
+                            if (!Directory.Exists(builder.ToString()))
+                                Directory.CreateDirectory(builder.ToString());
+
                         }
                         builder.Append(Path.GetFileName(file));
                         ImageFormat imgFormat = GetImageFormat(Path.GetExtension(file));
                         try
                         {
-                            Debug.WriteLine(builder.ToString());
-                            if (bitmap == null)
-                                Debug.WriteLine("bitmap disposed");
-                            
-                            bitmap.Save(builder.ToString(), imgFormat);
+                            if (bitmap != null)
+                            {
+                                bitmap.Save(builder.ToString(), imgFormat);
+                                bitmap.Dispose();
+                                bitmap = null;
+                            }
 
                         }
                         catch (ExternalException)
                         {
-                            Debug.WriteLine("Failed to write file");
+                            //failed to write file
                         }
-                        bitmap.Dispose();
                         if (ProcessedFile != null)
                             ProcessedFile.Invoke(this);
                         processed++;
